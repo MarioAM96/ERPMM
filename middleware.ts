@@ -22,5 +22,5 @@ export function middleware(request: NextRequest) {
 
 // Define las rutas donde se aplicará el middleware
 export const config = {
-  matcher: ['/dashboard/:path*', '/team/:path*', '/protected/:path*', '/login', '/'], // Ajusta según tus rutas
+  matcher: ['/dashboard/:path*', '/team/:path*', '/inventory/:path*', '/protected/:path*', '/login', '/'], // Ajusta según tus rutas
 };
