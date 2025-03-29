@@ -47,7 +47,7 @@ const data = {
     },
     {
       title: "Analytics",
-      url: "#",
+      url: "users",
       icon: IconChartBar,
     },
     {
