@@ -18,7 +18,7 @@ export default function TeamPage() {
           throw new Error('No authentication token found');
         }
 
-        const response = await fetch('http://127.0.0.1:8000/api/users', {
+        const response = await fetch('http://192.168.18.180:8000/api/users', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
