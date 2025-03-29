@@ -42,7 +42,7 @@ const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "#",
+      url: "dashboard",
       icon: IconDashboard,
     },
     {
@@ -62,7 +62,7 @@ const data = {
     },
     {
       title: "Team",
-      url: "#",
+      url: "team",
       icon: IconUsers,
     },
   ],
@@ -134,7 +134,7 @@ const data = {
   documents: [
     {
       name: "Data Library",
-      url: "#",
+      url: "team",
       icon: IconDatabase,
     },
     {
