@@ -41,7 +41,11 @@ export function LoginForm({
       const data = await response.json();
       // Cifrar los datos del usuario
       const encryptedUserData = CryptoJS.AES.encrypt(
-        JSON.stringify({ name: data.user.name, email: data.user.email, avatar: data.user.avatar }),
+        JSON.stringify({
+          name: data.user.name,
+          email: data.user.email,
+          avatar: data.user.avatar,
+        }),
         "your-secret-key" // Cambia esto por una clave secreta más segura
       ).toString();
 
@@ -60,9 +64,10 @@ export function LoginForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle>Login to your account</CardTitle>
+          <CardTitle>Inicia sesión en tu cuenta</CardTitle>
           <CardDescription>
-            Enter your email below to login to your account
+            Ingrese su correo electrónico a continuación para iniciar sesión en
+            su cuenta
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -86,7 +91,7 @@ export function LoginForm({
                     href="#"
                     className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
                   >
-                    Forgot your password?
+                    ¿Olvidaste tu contraseña?
                   </a>
                 </div>
                 <Input

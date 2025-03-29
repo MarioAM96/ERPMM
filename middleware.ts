@@ -2,7 +2,12 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  const token = request.cookies.get('token'); // O usa localStorage si es necesario
+  const token = request.cookies.get('token');
+  const isLoginPage = request.nextUrl.pathname === '/login';
+
+  // Establece una cookie para indicar si estamos en la página de login
+  const response = NextResponse.next();
+  response.cookies.set('isLoginPage', isLoginPage ? 'true' : 'false');
 
   // Rutas que no requieren autenticación
   const publicPaths = ['/login', '/signup'];
@@ -12,10 +17,10 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  return NextResponse.next();
+  return response;
 }
 
 // Define las rutas donde se aplicará el middleware
 export const config = {
-  matcher: ['/dashboard/:path*', '/protected/:path*'], // Ajusta según tus rutas
+  matcher: ['/dashboard/:path*', '/team/:path*', '/protected/:path*', '/login', '/'], // Ajusta según tus rutas
 };
