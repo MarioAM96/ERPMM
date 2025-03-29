@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import {
   IconCreditCard,
-  IconDotsVertical,
   IconLogout,
   IconNotification,
   IconUserCircle,
@@ -12,10 +11,9 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
-  DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
   SidebarMenu,
@@ -26,7 +24,6 @@ import {
 import CryptoJS from "crypto-js";
 
 export function NavUser() {
-  const { isMobile } = useSidebar();
   const [user, setUser] = useState<{
     name: string;
     email: string;
@@ -40,7 +37,7 @@ export function NavUser() {
       ?.split("=")[1];
 
     if (encryptedUserData) {
-      const bytes = CryptoJS.AES.decrypt(encryptedUserData, "your-secret-key"); // Usa la misma clave secreta
+      const bytes = CryptoJS.AES.decrypt(encryptedUserData, "your-secret-key");
       const decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
       setUser(decryptedData);
     }
@@ -64,12 +61,10 @@ export function NavUser() {
       });
 
       if (response.ok) {
-        // Eliminar el token y los datos del usuario de las cookies
         document.cookie =
           "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         document.cookie =
           "userData=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        // Redirigir al usuario a la página de inicio de sesión
         window.location.href = "/login";
       } else {
         console.error("Logout failed");
@@ -80,47 +75,13 @@ export function NavUser() {
   };
 
   return (
-    <SidebarMenu>
-      <SidebarMenuItem>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <SidebarMenuButton
-              size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-            >
-              {user ? (
-                <>
-                  <Avatar className="h-8 w-8 rounded-lg grayscale">
-                    <AvatarImage src={user.avatar} alt={user.name} />
-                    <AvatarFallback className="rounded-lg">
-                      {user.name
-                        .split(" ") // Divide el nombre en palabras
-                        .map((n) => n[0]) // Obtiene la primera letra de cada palabra
-                        .join("") // Une las iniciales
-                        .toUpperCase()}{" "}
-                      {/* Asegura que estén en mayúsculas */}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-medium">{user.name}</span>
-                    <span className="text-muted-foreground truncate text-xs">
-                      {user.email}
-                    </span>
-                  </div>
-                </>
-              ) : (
-                <span>Loading...</span>
-              )}
-              <IconDotsVertical className="ml-auto size-4" />
-            </SidebarMenuButton>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-            side={isMobile ? "bottom" : "right"}
-            align="end"
-            sideOffset={4}
-          >
-            <DropdownMenuLabel className="p-0 font-normal">
+    <DropdownMenuContent 
+      className="min-w-56 rounded-lg" 
+      side="bottom" 
+      align="end" 
+      sideOffset={4}
+    >
+      <DropdownMenuLabel className="p-0 font-normal">
               {user ? (
                 <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                   <Avatar className="h-8 w-8 rounded-lg grayscale">
@@ -146,28 +107,26 @@ export function NavUser() {
               )}
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <IconUserCircle />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <IconCreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <IconNotification />
-                Notifications
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout}>
-              <IconLogout />
-              Log out
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </SidebarMenuItem>
-    </SidebarMenu>
+      
+      <DropdownMenuGroup>
+        <DropdownMenuItem>
+          <IconUserCircle className="mr-2" />
+          Account
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          <IconCreditCard className="mr-2" />
+          Billing
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          <IconNotification className="mr-2" />
+          Notifications
+        </DropdownMenuItem>
+      </DropdownMenuGroup>
+      <DropdownMenuSeparator />
+      <DropdownMenuItem onClick={handleLogout}>
+        <IconLogout className="mr-2" />
+        Log out
+      </DropdownMenuItem>
+    </DropdownMenuContent>
   );
 }
