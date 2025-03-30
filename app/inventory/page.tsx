@@ -1,7 +1,7 @@
 "use client";
 import { DataTable } from "@/components/data-table-inventory";
 import { useState, useEffect } from "react";
-import Cookies from "js-cookie"; // Recomiendo usar js-cookie para manejar cookies
+import { apiService } from "@/services/apiService";
 
 export default function TeamPage() {
   const [users, setUsers] = useState([]);
@@ -11,30 +11,8 @@ export default function TeamPage() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        // Obtener el token de las cookies
-        const token = Cookies.get('token');
-
-        if (!token) {
-          throw new Error('No authentication token found');
-        }
-
-        const response = await fetch('http://192.168.18.180:8000/api/users', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}` // Asegúrate de usar el formato correcto para Sanctum
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch users');
-        }
-
-        const data = await response.json();
-        
-        // Transformar los datos si es necesario
-        // Sanctum devuelve los usuarios en data.data
-        setUsers(data.data);
+        const userData = await apiService.getUsers();
+        setUsers(userData);
         setIsLoading(false);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An unknown error occurred');
@@ -45,7 +23,6 @@ export default function TeamPage() {
     fetchUsers();
   }, []);
 
-  // Manejo de estados de carga y error
   if (isLoading) {
     return <div></div>;
   }

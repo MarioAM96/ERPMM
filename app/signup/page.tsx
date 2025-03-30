@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import axios from "axios";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -25,15 +24,21 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
+import { apiService } from "@/services/apiService"; // Importa el servicio API
 
 // Esquema de validación actualizado
 const formSchema = z.object({
-  name: z.string()
+  name: z
+    .string()
     .min(3, "Username must be at least 3 characters")
     .max(20, "Username must be at most 20 characters")
-    .regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores"),
+    .regex(
+      /^[a-zA-Z0-9_]+$/,
+      "Username can only contain letters, numbers, and underscores"
+    ),
   email: z.string().email("Invalid email address"),
-  password: z.string()
+  password: z
+    .string()
     .min(8, "Password must be at least 8 characters long")
     .regex(
       /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/,
@@ -60,18 +65,16 @@ const SignUp05Page = () => {
     setSubmitError(null);
 
     try {
-      const response = await axios.post('http://192.168.18.180:8000/api/users', data);
-      
-      console.log('User created:', response.data);
-      
+      // Usa el método createUser del apiService
+      const response = await apiService.createUser(data);
+
+      console.log("User created:", response);
+
       // Opcional: Redirigir después del registro exitoso
-      router.push('/login');
+      router.push("/login");
     } catch (error: any) {
-      console.error('Error creating user:', error);
-      setSubmitError(
-        error.response?.data?.message || 
-        "An error occurred during registration"
-      );
+      console.error("Error creating user:", error);
+      setSubmitError(error.message || "An error occurred during registration");
     } finally {
       setIsSubmitting(false);
     }
@@ -180,9 +183,9 @@ const SignUp05Page = () => {
                 </div>
               )}
 
-              <Button 
-                type="submit" 
-                className="mt-4 w-full" 
+              <Button
+                type="submit"
+                className="mt-4 w-full"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? "Creating Account..." : "Continue with Email"}
@@ -192,7 +195,10 @@ const SignUp05Page = () => {
 
           <p className="mt-5 text-sm text-center">
             Already have an account?
-            <Link href="/login" className="ml-1 underline text-muted-foreground">
+            <Link
+              href="/login"
+              className="ml-1 underline text-muted-foreground"
+            >
               Log in
             </Link>
           </p>

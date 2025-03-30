@@ -1,14 +1,14 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { useState } from "react"
-import axios from "axios"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
-
-import * as LabelPrimitive from "@radix-ui/react-label"
-import { Slot } from "@radix-ui/react-slot"
+import * as React from "react";
+import { useState } from "react";
+import axios from "axios";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { apiService } from "../../services/apiService";
+import * as LabelPrimitive from "@radix-ui/react-label";
+import { Slot } from "@radix-ui/react-slot";
 import {
   Controller,
   FormProvider,
@@ -17,47 +17,54 @@ import {
   type ControllerProps,
   type FieldPath,
   type FieldValues,
-} from "react-hook-form"
+} from "react-hook-form";
 
-import { cn } from "@/lib/utils"
-import { Label } from "@/components/ui/label"
+import { cn } from "@/lib/utils";
+import { Label } from "@/components/ui/label";
 
 // User Registration Schema
-const userRegistrationSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters" }),
-  username: z.string().min(3, { message: "Username must be at least 3 characters" })
-    .max(20, { message: "Username must be at most 20 characters" })
-    .regex(/^[a-zA-Z0-9_]+$/, { message: "Username can only contain letters, numbers, and underscores" }),
-  email: z.string().email({ message: "Invalid email address" }),
-  password: z.string()
-    .min(6, { message: "Password must be at least 6 characters" })
-    .regex(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/, { 
-      message: "Password must contain at least one letter and one number" 
-    }),
-  confirmPassword: z.string()
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords do not match",
-  path: ["confirmPassword"]
-})
+const userRegistrationSchema = z
+  .object({
+    name: z.string().min(2, { message: "Name must be at least 2 characters" }),
+    username: z
+      .string()
+      .min(3, { message: "Username must be at least 3 characters" })
+      .max(20, { message: "Username must be at most 20 characters" })
+      .regex(/^[a-zA-Z0-9_]+$/, {
+        message: "Username can only contain letters, numbers, and underscores",
+      }),
+    email: z.string().email({ message: "Invalid email address" }),
+    password: z
+      .string()
+      .min(6, { message: "Password must be at least 6 characters" })
+      .regex(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/, {
+        message: "Password must contain at least one letter and one number",
+      }),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
 
-type UserRegistrationData = z.infer<typeof userRegistrationSchema>
+type UserRegistrationData = z.infer<typeof userRegistrationSchema>;
 
-const Form = FormProvider
+const Form = FormProvider;
 
 type FormFieldContextValue<
   TFieldValues extends FieldValues = FieldValues,
-  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
 > = {
-  name: TName
-}
+  name: TName;
+};
 
 const FormFieldContext = React.createContext<FormFieldContextValue>(
   {} as FormFieldContextValue
-)
+);
 
 const FormField = <
   TFieldValues extends FieldValues = FieldValues,
-  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
 >({
   ...props
 }: ControllerProps<TFieldValues, TName>) => {
@@ -65,21 +72,21 @@ const FormField = <
     <FormFieldContext.Provider value={{ name: props.name }}>
       <Controller {...props} />
     </FormFieldContext.Provider>
-  )
-}
+  );
+};
 
 const useFormField = () => {
-  const fieldContext = React.useContext(FormFieldContext)
-  const itemContext = React.useContext(FormItemContext)
-  const { getFieldState } = useFormContext()
-  const formState = useFormState({ name: fieldContext.name })
-  const fieldState = getFieldState(fieldContext.name, formState)
+  const fieldContext = React.useContext(FormFieldContext);
+  const itemContext = React.useContext(FormItemContext);
+  const { getFieldState } = useFormContext();
+  const formState = useFormState({ name: fieldContext.name });
+  const fieldState = getFieldState(fieldContext.name, formState);
 
   if (!fieldContext) {
-    throw new Error("useFormField should be used within <FormField>")
+    throw new Error("useFormField should be used within <FormField>");
   }
 
-  const { id } = itemContext
+  const { id } = itemContext;
 
   return {
     id,
@@ -88,19 +95,19 @@ const useFormField = () => {
     formDescriptionId: `${id}-form-item-description`,
     formMessageId: `${id}-form-item-message`,
     ...fieldState,
-  }
-}
+  };
+};
 
 type FormItemContextValue = {
-  id: string
-}
+  id: string;
+};
 
 const FormItemContext = React.createContext<FormItemContextValue>(
   {} as FormItemContextValue
-)
+);
 
 function FormItem({ className, ...props }: React.ComponentProps<"div">) {
-  const id = React.useId()
+  const id = React.useId();
 
   return (
     <FormItemContext.Provider value={{ id }}>
@@ -110,14 +117,14 @@ function FormItem({ className, ...props }: React.ComponentProps<"div">) {
         {...props}
       />
     </FormItemContext.Provider>
-  )
+  );
 }
 
 function FormLabel({
   className,
   ...props
 }: React.ComponentProps<typeof LabelPrimitive.Root>) {
-  const { error, formItemId } = useFormField()
+  const { error, formItemId } = useFormField();
 
   return (
     <Label
@@ -127,11 +134,12 @@ function FormLabel({
       htmlFor={formItemId}
       {...props}
     />
-  )
+  );
 }
 
 function FormControl({ ...props }: React.ComponentProps<typeof Slot>) {
-  const { error, formItemId, formDescriptionId, formMessageId } = useFormField()
+  const { error, formItemId, formDescriptionId, formMessageId } =
+    useFormField();
 
   return (
     <Slot
@@ -145,11 +153,11 @@ function FormControl({ ...props }: React.ComponentProps<typeof Slot>) {
       aria-invalid={!!error}
       {...props}
     />
-  )
+  );
 }
 
 function FormDescription({ className, ...props }: React.ComponentProps<"p">) {
-  const { formDescriptionId } = useFormField()
+  const { formDescriptionId } = useFormField();
 
   return (
     <p
@@ -158,15 +166,15 @@ function FormDescription({ className, ...props }: React.ComponentProps<"p">) {
       className={cn("text-muted-foreground text-sm", className)}
       {...props}
     />
-  )
+  );
 }
 
 function FormMessage({ className, ...props }: React.ComponentProps<"p">) {
-  const { error, formMessageId } = useFormField()
-  const body = error ? String(error?.message ?? "") : props.children
+  const { error, formMessageId } = useFormField();
+  const body = error ? String(error?.message ?? "") : props.children;
 
   if (!body) {
-    return null
+    return null;
   }
 
   return (
@@ -178,13 +186,13 @@ function FormMessage({ className, ...props }: React.ComponentProps<"p">) {
     >
       {body}
     </p>
-  )
+  );
 }
 
 export default function UserRegistrationForm() {
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitError, setSubmitError] = useState<string | null>(null)
-  const [submitSuccess, setSubmitSuccess] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
 
   const form = useForm<UserRegistrationData>({
     resolver: zodResolver(userRegistrationSchema),
@@ -193,40 +201,38 @@ export default function UserRegistrationForm() {
       username: "",
       email: "",
       password: "",
-      confirmPassword: ""
-    }
-  })
+      confirmPassword: "",
+    },
+  });
 
   const onSubmit = async (data: UserRegistrationData) => {
-    setIsSubmitting(true)
-    setSubmitError(null)
-    setSubmitSuccess(false)
+    setIsSubmitting(true);
+    setSubmitError(null);
+    setSubmitSuccess(false);
 
     // Destructure to remove confirmPassword before sending to backend
-    const { confirmPassword, ...submitData } = data
+    const { confirmPassword, ...submitData } = data;
 
     try {
-      const response = await axios.post('http://192.168.18.180:8000/api/users', submitData)
-      
-      console.log('User created:', response.data)
-      setSubmitSuccess(true)
+      // Use the createUser method from apiService instead of direct axios call
+      const response = await apiService.createUser(submitData);
+
+      console.log("User created:", response);
+      setSubmitSuccess(true);
       // Optional: Reset form or redirect
-      form.reset()
+      form.reset();
     } catch (error: any) {
-      console.error('Error creating user:', error)
-      setSubmitError(
-        error.response?.data?.message || 
-        "An error occurred during registration"
-      )
+      console.error("Error creating user:", error);
+      setSubmitError(error.message || "An error occurred during registration");
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <div className="max-w-md mx-auto mt-10 p-6 bg-white shadow-md rounded-lg">
       <h2 className="text-2xl font-bold mb-6 text-center">User Registration</h2>
-      
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           {/* Name Field */}
@@ -237,11 +243,11 @@ export default function UserRegistrationForm() {
               <FormItem>
                 <FormLabel>Full Name</FormLabel>
                 <FormControl>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     placeholder="Enter your full name"
                     className="w-full px-3 py-2 border rounded-md"
-                    {...field} 
+                    {...field}
                   />
                 </FormControl>
                 <FormMessage />
@@ -257,11 +263,11 @@ export default function UserRegistrationForm() {
               <FormItem>
                 <FormLabel>Username</FormLabel>
                 <FormControl>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     placeholder="Choose a username"
                     className="w-full px-3 py-2 border rounded-md"
-                    {...field} 
+                    {...field}
                   />
                 </FormControl>
                 <FormDescription>
@@ -280,11 +286,11 @@ export default function UserRegistrationForm() {
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <input 
-                    type="email" 
+                  <input
+                    type="email"
                     placeholder="Enter your email"
                     className="w-full px-3 py-2 border rounded-md"
-                    {...field} 
+                    {...field}
                   />
                 </FormControl>
                 <FormMessage />
@@ -300,15 +306,16 @@ export default function UserRegistrationForm() {
               <FormItem>
                 <FormLabel>Password</FormLabel>
                 <FormControl>
-                  <input 
-                    type="password" 
+                  <input
+                    type="password"
                     placeholder="Create a password"
                     className="w-full px-3 py-2 border rounded-md"
-                    {...field} 
+                    {...field}
                   />
                 </FormControl>
                 <FormDescription>
-                  Password must be at least 6 characters and contain a letter and a number
+                  Password must be at least 6 characters and contain a letter
+                  and a number
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -323,11 +330,11 @@ export default function UserRegistrationForm() {
               <FormItem>
                 <FormLabel>Confirm Password</FormLabel>
                 <FormControl>
-                  <input 
-                    type="password" 
+                  <input
+                    type="password"
                     placeholder="Confirm your password"
                     className="w-full px-3 py-2 border rounded-md"
-                    {...field} 
+                    {...field}
                   />
                 </FormControl>
                 <FormMessage />
@@ -336,8 +343,8 @@ export default function UserRegistrationForm() {
           />
 
           {/* Submit Button */}
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={isSubmitting}
             className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition-colors"
           >
@@ -360,7 +367,7 @@ export default function UserRegistrationForm() {
         </form>
       </Form>
     </div>
-  )
+  );
 }
 
 export {
@@ -372,4 +379,4 @@ export {
   FormDescription,
   FormMessage,
   FormField,
-}
+};
