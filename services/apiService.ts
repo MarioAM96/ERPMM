@@ -64,5 +64,28 @@ export const apiService = {
         }
     },
 
+    async login(credentials: { email: string; password: string }) {
+        try {
+            const response = await apiClient.post('/login', credentials);
+            return response.data; // Asume que devuelve { token, user: {...} }
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                throw new Error(error.response?.data.message || 'Login failed');
+            }
+            throw error;
+        }
+    },
+
+    async logout() {
+        try {
+            const response = await apiClient.post('/logout');
+            return response.data;
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                throw new Error(error.response?.data.message || 'Logout failed');
+            }
+            throw error;
+        }
+    },
 
 };

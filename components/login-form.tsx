@@ -4,14 +4,16 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
+  CardDescription,
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import CryptoJS from "crypto-js";
+import { apiService } from "@/services/apiService"; // Importa el servicio API
+import Cookies from 'js-cookie'; // Asegúrate de tener instalado js-cookie
 
 export function LoginForm({
   className,
@@ -26,37 +28,27 @@ export function LoginForm({
     setError("");
 
     try {
-      const response = await fetch("http://192.168.18.180:8000/api/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
+      // Usa un método de login en tu apiService
+      const response = await apiService.login({ email, password });
 
-      if (!response.ok) {
-        throw new Error("Login failed");
-      }
-
-      const data = await response.json();
       // Cifrar los datos del usuario
       const encryptedUserData = CryptoJS.AES.encrypt(
         JSON.stringify({
-          name: data.user.name,
-          email: data.user.email,
-          avatar: data.user.avatar,
+          name: response.user.name,
+          email: response.user.email,
+          avatar: response.user.avatar,
         }),
         "your-secret-key" // Cambia esto por una clave secreta más segura
       ).toString();
 
-      // Guardar el token y los datos cifrados en cookies
-      document.cookie = `token=${data.token}; path=/;`;
-      document.cookie = `userData=${encryptedUserData}; path=/;`;
+      // Guardar el token y los datos cifrados usando js-cookie
+      Cookies.set('token', response.token, { path: '/' });
+      Cookies.set('userData', encryptedUserData, { path: '/' });
 
       // Redirigir al usuario a la página de dashboard
       window.location.href = "/dashboard";
-    } catch (err) {
-      setError("Invalid email or password");
+    } catch (err: any) {
+      setError(err.message || "Invalid email or password");
     }
   };
 

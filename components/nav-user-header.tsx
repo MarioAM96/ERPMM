@@ -15,13 +15,9 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import {
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  useSidebar,
-} from "@/components/ui/sidebar";
 import CryptoJS from "crypto-js";
+import Cookies from 'js-cookie';
+import { apiService } from "@/services/apiService"; // Importa el servicio API
 
 export function NavUser() {
   const [user, setUser] = useState<{
@@ -31,10 +27,7 @@ export function NavUser() {
   } | null>(null);
 
   useEffect(() => {
-    const encryptedUserData = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("userData="))
-      ?.split("=")[1];
+    const encryptedUserData = Cookies.get('userData');
 
     if (encryptedUserData) {
       const bytes = CryptoJS.AES.decrypt(encryptedUserData, "your-secret-key");
@@ -44,31 +37,20 @@ export function NavUser() {
   }, []);
 
   const handleLogout = async () => {
-    const token = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("token="))
-      ?.split("=")[1];
+    const token = Cookies.get('token');
 
     if (!token) return;
 
     try {
-      const response = await fetch("http://192.168.18.180:8000/api/logout", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+      // Usa el método de logout del apiService
+      await apiService.logout();
 
-      if (response.ok) {
-        document.cookie =
-          "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        document.cookie =
-          "userData=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        window.location.href = "/login";
-      } else {
-        console.error("Logout failed");
-      }
+      // Eliminar cookies
+      Cookies.remove('token');
+      Cookies.remove('userData');
+
+      // Redirigir a la página de login
+      window.location.href = "/login";
     } catch (error) {
       console.error("Error during logout:", error);
     }
@@ -82,31 +64,30 @@ export function NavUser() {
       sideOffset={4}
     >
       <DropdownMenuLabel className="p-0 font-normal">
-              {user ? (
-                <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                  <Avatar className="h-8 w-8 rounded-lg grayscale">
-                    <AvatarImage src={user.avatar} alt={user.name} />
-                    <AvatarFallback className="rounded-lg">
-                      {user.name
-                        .split(" ") // Divide el nombre en palabras
-                        .map((n) => n[0]) // Obtiene la primera letra de cada palabra
-                        .join("") // Une las iniciales
-                        .toUpperCase()}{" "}
-                      {/* Asegura que estén en mayúsculas */}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-medium">{user.name}</span>
-                    <span className="text-muted-foreground truncate text-xs">
-                      {user.email}
-                    </span>
-                  </div>
-                </div>
-              ) : (
-                <span>Loading...</span>
-              )}
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
+        {user ? (
+          <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+            <Avatar className="h-8 w-8 rounded-lg grayscale">
+              <AvatarImage src={user.avatar} alt={user.name} />
+              <AvatarFallback className="rounded-lg">
+                {user.name
+                  .split(" ")
+                  .map((n) => n[0])
+                  .join("")
+                  .toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div className="grid flex-1 text-left text-sm leading-tight">
+              <span className="truncate font-medium">{user.name}</span>
+              <span className="text-muted-foreground truncate text-xs">
+                {user.email}
+              </span>
+            </div>
+          </div>
+        ) : (
+          <span>Loading...</span>
+        )}
+      </DropdownMenuLabel>
+      <DropdownMenuSeparator />
       
       <DropdownMenuGroup>
         <DropdownMenuItem>

@@ -24,6 +24,8 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import CryptoJS from "crypto-js";
+import Cookies from 'js-cookie';
+import { apiService } from "@/services/apiService"; // Importa el servicio API
 
 export function NavUser() {
   const { isMobile } = useSidebar();
@@ -34,46 +36,30 @@ export function NavUser() {
   } | null>(null);
 
   useEffect(() => {
-    const encryptedUserData = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("userData="))
-      ?.split("=")[1];
+    const encryptedUserData = Cookies.get('userData');
 
     if (encryptedUserData) {
-      const bytes = CryptoJS.AES.decrypt(encryptedUserData, "your-secret-key"); // Usa la misma clave secreta
+      const bytes = CryptoJS.AES.decrypt(encryptedUserData, "your-secret-key");
       const decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
       setUser(decryptedData);
     }
   }, []);
 
   const handleLogout = async () => {
-    const token = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("token="))
-      ?.split("=")[1];
+    const token = Cookies.get('token');
 
     if (!token) return;
 
     try {
-      const response = await fetch("http://192.168.18.180:8000/api/logout", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+      // Usa el método de logout del apiService
+      await apiService.logout();
 
-      if (response.ok) {
-        // Eliminar el token y los datos del usuario de las cookies
-        document.cookie =
-          "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        document.cookie =
-          "userData=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        // Redirigir al usuario a la página de inicio de sesión
-        window.location.href = "/login";
-      } else {
-        console.error("Logout failed");
-      }
+      // Eliminar cookies
+      Cookies.remove('token');
+      Cookies.remove('userData');
+
+      // Redirigir al usuario a la página de inicio de sesión
+      window.location.href = "/login";
     } catch (error) {
       console.error("Error during logout:", error);
     }
@@ -94,11 +80,10 @@ export function NavUser() {
                     <AvatarImage src={user.avatar} alt={user.name} />
                     <AvatarFallback className="rounded-lg">
                       {user.name
-                        .split(" ") // Divide el nombre en palabras
-                        .map((n) => n[0]) // Obtiene la primera letra de cada palabra
-                        .join("") // Une las iniciales
-                        .toUpperCase()}{" "}
-                      {/* Asegura que estén en mayúsculas */}
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")
+                        .toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
@@ -127,11 +112,10 @@ export function NavUser() {
                     <AvatarImage src={user.avatar} alt={user.name} />
                     <AvatarFallback className="rounded-lg">
                       {user.name
-                        .split(" ") // Divide el nombre en palabras
-                        .map((n) => n[0]) // Obtiene la primera letra de cada palabra
-                        .join("") // Une las iniciales
-                        .toUpperCase()}{" "}
-                      {/* Asegura que estén en mayúsculas */}
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")
+                        .toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
